@@ -1,0 +1,8 @@
+export PRIVATE_KEY=
+export CHAIN_ID=
+export RPC_URL=
+export ETHERSCAN_API_KEY=
+
+forge script DeploymentScript --slow --broadcast --chain-id $CHAIN_ID --etherscan-api-key $ETHERSCAN_API_KEY --verify --build-info --build-info-path deployment --rpc-url $RPC_URL
+
+forge verify-contract <ADDRESS> <CONTRACT> --etherscan-api-key $ETHERSCAN_API_KEY --verifier-url <VERIFIER_API_URL> --chain-id $CHAIN_ID --watch --optimizer-runs 200 --compiler-version "v0.8.28+commit.7893614a" --constructor-args <CONSTRUCTOR_ARGS>
