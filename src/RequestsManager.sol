@@ -238,12 +238,13 @@ contract RequestsManager is IRequestsManager, AccessControlDefaultAdminRules, Pa
     request.state = State.COMPLETED;
 
     ISimpleToken issueToken = ISimpleToken(ISSUE_TOKEN_ADDRESS);
-    issueToken.burn(_idempotencyKey, address(this), request.amount);
+    uint256 burnAmount = request.amount;
+    issueToken.burn(_idempotencyKey, address(this), burnAmount);
 
     // slither-disable-next-line arbitrary-send-erc20
     IERC20(request.token).safeTransferFrom(treasuryAddress, request.provider, _withdrawalAmount);
 
-    emit BurnRequestCompleted(_id, request.amount, _withdrawalAmount);
+    emit BurnRequestCompleted(_id, burnAmount, _withdrawalAmount);
   }
 
   function emergencyWithdraw(IERC20 _token) external onlyRole(DEFAULT_ADMIN_ROLE) {
