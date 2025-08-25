@@ -10,8 +10,8 @@ import {ISimpleToken} from "./interfaces/ISimpleToken.sol";
 contract SimpleToken is ISimpleToken, Initializable, ERC20PermitUpgradeable, AccessControlDefaultAdminRulesUpgradeable {
   bytes32 public constant SERVICE_ROLE = keccak256("SERVICE_ROLE");
 
-  mapping(bytes32 => bool) private mintIds;
-  mapping(bytes32 => bool) private burnIds;
+  mapping(bytes32 idempotencyKey => bool used) private mintIds;
+  mapping(bytes32 idempotencyKey => bool used) private burnIds;
 
   modifier idempotentMint(bytes32 _idempotencyKey) {
     if (mintIds[_idempotencyKey]) {
