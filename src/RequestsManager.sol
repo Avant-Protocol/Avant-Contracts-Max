@@ -76,6 +76,7 @@ contract RequestsManager is IRequestsManager, AccessControlDefaultAdminRules, Pa
       _assertNonZero(allowedTokenAddress);
       if (allowedTokenAddress.code.length == 0) revert InvalidTokenAddress(allowedTokenAddress);
       allowedTokens[allowedTokenAddress] = true;
+      emit AllowedTokenAdded(allowedTokenAddress);
     }
 
     // isWhitelistEnabled = true;
@@ -130,7 +131,7 @@ contract RequestsManager is IRequestsManager, AccessControlDefaultAdminRules, Pa
     IERC20(_depositTokenAddress).safeTransferFrom(msg.sender, address(this), _amount);
     Request memory request = _addMintRequest(_depositTokenAddress, _amount, _minMintAmount);
 
-    emit MintRequestCreated(request.id, request.provider, request.token, request.amount, request.minExpectedAmount);
+    emit MintRequestCreated(request.id, msg.sender, request.token, request.amount, request.minExpectedAmount);
   }
 
   function requestMintWithPermit(
@@ -157,7 +158,7 @@ contract RequestsManager is IRequestsManager, AccessControlDefaultAdminRules, Pa
     request.state = State.CANCELLED;
 
     IERC20 depositedToken = IERC20(request.token);
-    depositedToken.safeTransfer(request.provider, request.amount);
+    depositedToken.safeTransfer(msg.sender, request.amount);
 
     emit MintRequestCancelled(_id);
   }
@@ -194,7 +195,7 @@ contract RequestsManager is IRequestsManager, AccessControlDefaultAdminRules, Pa
 
     Request memory request = _addBurnRequest(_withdrawalTokenAddress, _issueTokenAmount, _minWithdrawalAmount);
 
-    emit BurnRequestCreated(request.id, request.provider, request.token, request.amount, request.minExpectedAmount);
+    emit BurnRequestCreated(request.id, msg.sender, request.token, request.amount, request.minExpectedAmount);
   }
 
   function requestBurnWithPermit(
@@ -220,7 +221,7 @@ contract RequestsManager is IRequestsManager, AccessControlDefaultAdminRules, Pa
 
     request.state = State.CANCELLED;
     IERC20 issueToken = IERC20(ISSUE_TOKEN_ADDRESS);
-    issueToken.safeTransfer(request.provider, request.amount);
+    issueToken.safeTransfer(msg.sender, request.amount);
 
     emit BurnRequestCancelled(_id);
   }
@@ -272,8 +273,6 @@ contract RequestsManager is IRequestsManager, AccessControlDefaultAdminRules, Pa
     unchecked {
       mintRequestsCounter++;
     }
-
-    return mintRequest;
   }
 
   function _addBurnRequest(
@@ -295,8 +294,6 @@ contract RequestsManager is IRequestsManager, AccessControlDefaultAdminRules, Pa
     unchecked {
       burnRequestsCounter++;
     }
-
-    return burnRequest;
   }
 
   function _assertNonZero(address _address) internal pure returns (address nonZeroAddress) {
