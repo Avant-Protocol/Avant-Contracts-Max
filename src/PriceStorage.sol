@@ -7,7 +7,7 @@ import {IPriceStorage} from "./interfaces/IPriceStorage.sol";
 
 contract PriceStorage is IPriceStorage, AccessControlDefaultAdminRulesUpgradeable {
   bytes32 public constant SERVICE_ROLE = keccak256("SERVICE_ROLE");
-  uint128 public constant BOUND_PERCENTAGE_DENOMINATOR = 1e18;
+  uint256 public constant BOUND_PERCENTAGE_DENOMINATOR = 1e18;
 
   mapping(bytes32 key => Price price) public prices;
   Price public lastPrice;
@@ -33,10 +33,11 @@ contract PriceStorage is IPriceStorage, AccessControlDefaultAdminRulesUpgradeabl
 
     uint128 lastPriceValue = lastPrice.price;
     if (lastPriceValue != 0) {
-      uint128 upperBound = lastPriceValue + ((lastPriceValue * upperBoundPercentage) / BOUND_PERCENTAGE_DENOMINATOR);
-      uint128 lowerBound = lastPriceValue - ((lastPriceValue * lowerBoundPercentage) / BOUND_PERCENTAGE_DENOMINATOR);
+      uint256 upperBound = uint256(lastPriceValue) + ((uint256(lastPriceValue) * upperBoundPercentage) / BOUND_PERCENTAGE_DENOMINATOR);
+      uint256 lowerBound = uint256(lastPriceValue) - ((uint256(lastPriceValue) * lowerBoundPercentage) / BOUND_PERCENTAGE_DENOMINATOR);
+
       if (_price > upperBound || _price < lowerBound) {
-        revert InvalidPriceRange(_price, lowerBound, upperBound);
+        revert InvalidPriceRange(_price, uint128(lowerBound), uint128(upperBound));
       }
     }
 
