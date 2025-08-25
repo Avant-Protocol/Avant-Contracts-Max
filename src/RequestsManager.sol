@@ -71,7 +71,7 @@ contract RequestsManager is IRequestsManager, AccessControlDefaultAdminRules, Pa
 
     if (_providersWhitelistAddress.code.length == 0) revert InvalidProvidersWhitelist(_providersWhitelistAddress);
 
-    for (uint256 i; i < _allowedTokenAddresses.length; i++) {
+    for (uint256 i = 0; i < _allowedTokenAddresses.length; i++) {
       address allowedTokenAddress = _allowedTokenAddresses[i];
       _assertNonZero(allowedTokenAddress);
       if (allowedTokenAddress.code.length == 0) revert InvalidTokenAddress(allowedTokenAddress);
