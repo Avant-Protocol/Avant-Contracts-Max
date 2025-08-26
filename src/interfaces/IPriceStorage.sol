@@ -3,28 +3,28 @@ pragma solidity ^0.8.28;
 
 interface IPriceStorage {
   struct Price {
-    uint256 price;
-    uint256 timestamp;
+    uint128 price;
+    uint128 timestamp;
   }
 
-  event PriceSet(bytes32 indexed key, uint256 price, uint256 timestamp);
-  event UpperBoundPercentageSet(uint256 upperBoundPercentage);
-  event LowerBoundPercentageSet(uint256 lowerBoundPercentage);
+  event PriceSet(bytes32 indexed key, uint128 price, uint128 timestamp);
+  event UpperBoundPercentageSet(uint128 upperBoundPercentage);
+  event LowerBoundPercentageSet(uint128 lowerBoundPercentage);
 
   error PriceAlreadySet(bytes32 key);
   error InvalidPrice();
   error InvalidKey();
   error InvalidUpperBoundPercentage();
   error InvalidLowerBoundPercentage();
-  error InvalidPriceRange(uint256 price, uint256 lowerBound, uint256 upperBound);
+  error InvalidPriceRange(uint128 price, uint128 lowerBound, uint128 upperBound);
 
-  function setPrice(bytes32 _key, uint256 _price) external;
+  function setPrice(bytes32 _key, uint128 _price) external;
 
-  function setUpperBoundPercentage(uint256 _upperBoundPercentage) external;
+  function setUpperBoundPercentage(uint128 _upperBoundPercentage) external;
 
-  function setLowerBoundPercentage(uint256 _lowerBoundPercentage) external;
+  function setLowerBoundPercentage(uint128 _lowerBoundPercentage) external;
 
-  function lastPrice() external view returns (uint256 price, uint256 timestamp);
+  function lastPrice() external view returns (uint128 price, uint128 timestamp);
 
-  function prices(bytes32 _key) external view returns (uint256 price, uint256 timestamp);
+  function prices(bytes32 _key) external view returns (uint128 price, uint128 timestamp);
 }
