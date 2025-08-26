@@ -150,7 +150,7 @@ contract RequestsManager is IRequestsManager, AccessControlDefaultAdminRules, Pa
     requestMint(_depositTokenAddress, _amount, _minMintAmount);
   }
 
-  function cancelMint(uint256 _id) external mintRequestExist(_id) {
+  function cancelMint(uint256 _id) external {
     Request storage request = mintRequests[_id];
     _assertAddress(request.provider, msg.sender);
     _assertState(State.CREATED, request.state);
@@ -214,7 +214,7 @@ contract RequestsManager is IRequestsManager, AccessControlDefaultAdminRules, Pa
     requestBurn(_issueTokenAmount, _withdrawalTokenAddress, _minWithdrawalAmount);
   }
 
-  function cancelBurn(uint256 _id) external burnRequestExist(_id) {
+  function cancelBurn(uint256 _id) external {
     Request storage request = burnRequests[_id];
     _assertAddress(request.provider, msg.sender);
     _assertState(State.CREATED, request.state);
