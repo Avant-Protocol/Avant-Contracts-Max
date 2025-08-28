@@ -17,8 +17,8 @@ contract DeploymentScript is Script {
   string TOKEN_NAME = "avETH MAX";
   string TOKEN_SYMBOL = "avETHx";
 
-  uint256 PRICE_UPDATE_UPPER_BOUND_PERCENTAGE = .05 ether; // 5%
-  uint256 PRICE_UPDATE_LOWER_BOUND_PERCENTAGE = .33 ether; // 33%
+  uint128 PRICE_UPDATE_UPPER_BOUND_PERCENTAGE = .05 ether; // 5%
+  uint128 PRICE_UPDATE_LOWER_BOUND_PERCENTAGE = .33 ether; // 33%
 
   address INPUT_TOKEN = 0x9469470C9878bf3d6d0604831d9A3A366156f7EE; // avETH on Ethereum
   address MINT_DEPOSIT_VAULT = 0xdD71CDd615f677E98C604bFF5679294cC7a6089b; // MAX avETH - Mint Deposit Vault (avETH Workspace)
