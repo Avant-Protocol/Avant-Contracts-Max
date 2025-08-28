@@ -12,3 +12,18 @@ docs/
 
 # Dotenv file
 .env
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Foundry
+cache/
+out/
+foundry.lock
+.DS_Store
+
+# Coverage
+coverage/
+lcov.info
+.gas-snapshot

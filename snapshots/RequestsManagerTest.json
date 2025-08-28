@@ -1,0 +1,19 @@
+{
+  "RequestsManager_addAllowedToken": "26248",
+  "RequestsManager_cancelBurn": "6536",
+  "RequestsManager_cancelMint": "6259",
+  "RequestsManager_completeBurn": "46306",
+  "RequestsManager_completeMint": "82864",
+  "RequestsManager_constructor": "7232027",
+  "RequestsManager_emergencyWithdraw": "28717",
+  "RequestsManager_pause": "8863",
+  "RequestsManager_removeAllowedToken": "8981",
+  "RequestsManager_requestBurn": "149696",
+  "RequestsManager_requestBurnWithPermit": "183963",
+  "RequestsManager_requestMint": "154108",
+  "RequestsManager_requestMintWithPermit": "159480",
+  "RequestsManager_setProvidersWhitelist": "9069",
+  "RequestsManager_setTreasury": "8953",
+  "RequestsManager_setWhitelistEnabled": "8831",
+  "RequestsManager_unpause": "2041"
+}

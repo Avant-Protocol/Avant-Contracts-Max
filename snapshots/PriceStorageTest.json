@@ -1,0 +1,9 @@
+{
+  "PriceStorage_initialize": "119649",
+  "PriceStorage_setLowerBoundPercentage": "13849",
+  "PriceStorage_setPrice_first": "54038",
+  "PriceStorage_setPrice_firstInSequence": "54038",
+  "PriceStorage_setPrice_tenthInSequence": "26536",
+  "PriceStorage_setPrice_withinBounds": "28536",
+  "PriceStorage_setUpperBoundPercentage": "13819"
+}
