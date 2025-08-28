@@ -1,0 +1,20 @@
+{
+  "AddressesWhitelist_acceptOwnership": "5166",
+  "AddressesWhitelist_addAccount_alreadyWhitelisted": "1897",
+  "AddressesWhitelist_addAccount_cold": "25797",
+  "AddressesWhitelist_addAccount_fifthSlot": "23797",
+  "AddressesWhitelist_addAccount_firstSlot": "25797",
+  "AddressesWhitelist_addAccount_firstTime": "25797",
+  "AddressesWhitelist_addAccount_third": "23797",
+  "AddressesWhitelist_addAccount_warm": "23797",
+  "AddressesWhitelist_constructor": "376803",
+  "AddressesWhitelist_isAllowedAccount_afterRemove": "578",
+  "AddressesWhitelist_isAllowedAccount_false": "2578",
+  "AddressesWhitelist_isAllowedAccount_true": "578",
+  "AddressesWhitelist_removeAccount_existing": "1836",
+  "AddressesWhitelist_removeAccount_fifthSlot": "1836",
+  "AddressesWhitelist_removeAccount_firstSlot": "1836",
+  "AddressesWhitelist_removeAccount_nonExisting": "5836",
+  "AddressesWhitelist_renounceOwnership": "9158",
+  "AddressesWhitelist_transferOwnership": "26330"
+}

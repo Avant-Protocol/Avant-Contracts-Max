@@ -1,0 +1,15 @@
+{
+  "SimpleToken_burn_all": "3837",
+  "SimpleToken_burn_idempotent_first": "26250",
+  "SimpleToken_burn_idempotent_third": "26250",
+  "SimpleToken_burn_nonIdempotent": "3837",
+  "SimpleToken_burn_partial": "3837",
+  "SimpleToken_initialize": "190281",
+  "SimpleToken_mint_first": "54079",
+  "SimpleToken_mint_idempotent_first": "76507",
+  "SimpleToken_mint_idempotent_newAccount": "48107",
+  "SimpleToken_mint_idempotent_third": "48107",
+  "SimpleToken_mint_nonIdempotent": "54079",
+  "SimpleToken_mint_toExisting": "3779",
+  "SimpleToken_permit": "51916"
+}
