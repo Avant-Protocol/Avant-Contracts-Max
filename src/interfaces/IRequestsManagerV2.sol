@@ -45,7 +45,8 @@ interface IRequestsManagerV2 {
     address indexed provider,
     address withdrawalTokenAddress,
     uint256 issueTokenAmount,
-    uint128 price
+    uint128 price,
+    uint64 fee
   );
   event BurnRequestCompleted(uint256 indexed id, address indexed provider, uint256 burnedAmount, uint256 withdrawalAmount, uint128 price, uint64 fee);
   event BurnRequestCancelled(uint256 indexed id, address indexed provider);
@@ -81,17 +82,19 @@ interface IRequestsManagerV2 {
     uint256 amount;             // 32 bytes ── slot 2
   }
 
-  /// @notice Burn request. Price value is captured at request time from PriceStorage.lastPrice().
+  /// @notice Burn request. Price and fee are captured at request time, making the
+  ///         withdrawal amount fully deterministic from the moment the request is created.
   /// @dev Packed into 4 storage slots:
   ///      Slot 0: provider (20) + state (1) + createdAt (5) = 26 bytes
-  ///      Slot 1: price (16 bytes)
+  ///      Slot 1: price (16) + fee (8) = 24 bytes
   ///      Slot 2: token (20 bytes)
   ///      Slot 3: amount (32 bytes)
   struct BurnRequest {
     address provider;           // 20 bytes ─┐
     State state;                //  1 byte   │ slot 0
     uint40 createdAt;           //  5 bytes ─┘
-    uint128 price;              // 16 bytes ── slot 1
+    uint128 price;              // 16 bytes ─┐ slot 1
+    uint64 fee;                 //  8 bytes ─┘
     address token;              // 20 bytes ── slot 2
     uint256 amount;             // 32 bytes ── slot 3
   }

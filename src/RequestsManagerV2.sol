@@ -146,9 +146,8 @@ contract RequestsManagerV2 is IRequestsManagerV2, AccessControlDefaultAdminRules
     emit MintFeeSet(_fee);
   }
 
-  /// @notice Sets the burn fee. WARNING: this applies retroactively to all pending burn requests
-  ///         since fees are evaluated at completion time, not request time. Change fees only after
-  ///         all pending burn requests have been completed, or notify affected users.
+  /// @notice Sets the burn fee. Only affects burn requests created after this change —
+  ///         pending burns use the fee that was locked at request time.
   function setBurnFee(uint64 _fee) external onlyRole(DEFAULT_ADMIN_ROLE) {
     if (_fee > MAX_FEE) revert FeeTooHigh(_fee);
     burnFee = _fee;
@@ -270,19 +269,22 @@ contract RequestsManagerV2 is IRequestsManagerV2, AccessControlDefaultAdminRules
     (uint128 price,) = PRICE_STORAGE.lastPrice();
     if (price == 0) revert PriceNotSet(0);
 
+    uint64 fee = burnFee;
+
     uint256 id = burnRequestsCounter;
     burnRequests[id] = BurnRequest({
       provider: msg.sender,
       state: State.CREATED,
       createdAt: uint40(block.timestamp),
       price: price,
+      fee: fee,
       token: _withdrawalTokenAddress,
       amount: _issueTokenAmount
     });
 
     unchecked { burnRequestsCounter++; }
 
-    emit BurnRequestCreated(id, msg.sender, _withdrawalTokenAddress, _issueTokenAmount, price);
+    emit BurnRequestCreated(id, msg.sender, _withdrawalTokenAddress, _issueTokenAmount, price, fee);
   }
 
   function requestBurnWithPermit(
@@ -331,18 +333,19 @@ contract RequestsManagerV2 is IRequestsManagerV2, AccessControlDefaultAdminRules
       revert BurnRequestExpired(_id, request.createdAt, burnRequestTTL);
     }
 
-    // Cache before state change
+    // Cache before state change — price and fee were locked at request time
     address provider = request.provider;
     address token = request.token;
     uint256 burnAmount = request.amount;
-    uint128 price = request.price; // locked at request time — no external call needed
+    uint128 price = request.price;
+    uint64 fee = request.fee;
 
     // Integer division truncates — rounding favors the protocol (user receives less).
     uint256 withdrawalAmount = (burnAmount * price) / PRECISION;
 
-    // Fee is always applied; when burnFee == 0, this is a no-op.
+    // Fee was locked at request time — immune to post-request fee changes.
     // Division truncates — again favoring the protocol.
-    withdrawalAmount = (withdrawalAmount * (PRECISION - burnFee)) / PRECISION;
+    withdrawalAmount = (withdrawalAmount * (PRECISION - fee)) / PRECISION;
 
     request.state = State.COMPLETED;
 
@@ -352,7 +355,7 @@ contract RequestsManagerV2 is IRequestsManagerV2, AccessControlDefaultAdminRules
     // slither-disable-next-line arbitrary-send-erc20
     IERC20(token).safeTransferFrom(treasuryAddress, provider, withdrawalAmount);
 
-    emit BurnRequestCompleted(_id, provider, burnAmount, withdrawalAmount, price, burnFee);
+    emit BurnRequestCompleted(_id, provider, burnAmount, withdrawalAmount, price, fee);
   }
 
   // ──────────────────────────────────────────────────────────────

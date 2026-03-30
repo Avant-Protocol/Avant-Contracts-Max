@@ -276,6 +276,44 @@ contract RequestsManagerV2Test is Test {
         assertEq(depositToken.balanceOf(alice), 100_000e18 + 98e18);
     }
 
+    function test_CompleteBurn_FeeLockedAtRequestTime() public {
+        vm.prank(admin);
+        manager.setBurnFee(0.02e18); // 2% at request time
+
+        _setPrice(1000, 1e18);
+        vm.warp(1000);
+        uint256 id = _requestBurn(alice, 100e18);
+
+        // Admin changes fee to 5% after the request — should not affect this burn
+        vm.prank(admin);
+        manager.setBurnFee(0.05e18);
+
+        vm.warp(1000 + 7 days);
+        vm.prank(service);
+        manager.completeBurn(id);
+
+        // User gets 98 (2% fee locked at request time), not 95 (current 5%)
+        assertEq(depositToken.balanceOf(alice), 100_000e18 + 98e18);
+    }
+
+    function test_CompleteBurn_FeeZeroAtRequestTimeIgnoresLaterFee() public {
+        // No fee at request time
+        _setPrice(1000, 1e18);
+        vm.warp(1000);
+        uint256 id = _requestBurn(alice, 100e18);
+
+        // Admin sets 3% fee after the request
+        vm.prank(admin);
+        manager.setBurnFee(0.03e18);
+
+        vm.warp(1000 + 7 days);
+        vm.prank(service);
+        manager.completeBurn(id);
+
+        // User gets full 100 — fee was 0 at request time
+        assertEq(depositToken.balanceOf(alice), 100_000e18 + 100e18);
+    }
+
     function test_CompleteBurn_RevertExpired() public {
         _setPrice(1000, 1e18);
         vm.warp(1000);

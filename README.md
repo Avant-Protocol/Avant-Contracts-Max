@@ -186,7 +186,7 @@ All transitions are one-way. No path from COMPLETED or CANCELLED back to CREATED
 | Risk | Severity | Rationale for acceptance |
 |------|----------|------------------------|
 | `emergencyWithdraw` can drain tokens locked by pending requests | Medium | Admin is a multisig with 1-day transfer delay. The same admin already controls treasury, fees, and price oracle — removing this one capability doesn't meaningfully change the trust profile. |
-| `setBurnFee` applies retroactively to pending burns | Low | Documented in natspec. Operational procedure: change fees only after pending burns are settled. |
+| `setMintFee` applies to pending mints not yet completed | Low | Mints complete within minutes so the window is narrow. Fee at request time is visible in events. |
 | `setTreasury` can redirect funds mid-flight | Low | Pending `completeBurn` calls pull from the new treasury (which may not have approved). Operational constraint on admin. |
 | Dust deposits can round to zero mint amount | Informational | 1 wei deposit at high price yields 0 issue tokens. Protocol keeps the dust. Economically irrelevant. |
 | SERVICE_ROLE can censor (refuse to complete) | Informational | Inherent to async architecture. Users can always `cancel` to exit. |
