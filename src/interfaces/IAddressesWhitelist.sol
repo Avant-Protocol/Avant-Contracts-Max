@@ -2,10 +2,10 @@
 pragma solidity ^0.8.28;
 
 interface IAddressesWhitelist {
-  error ZeroAddress();
+    error ZeroAddress();
 
-  event AccountAdded(address account);
-  event AccountRemoved(address account);
+    event AccountAdded(address account);
+    event AccountRemoved(address account);
 
-  function isAllowedAccount(address _account) external view returns (bool isAllowed);
+    function isAllowedAccount(address _account) external view returns (bool isAllowed);
 }

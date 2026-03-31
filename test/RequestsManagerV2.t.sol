@@ -40,8 +40,7 @@ contract RequestsManagerV2Test is Test {
 
         SimpleToken issueTokenImpl = new SimpleToken();
         ERC1967Proxy issueTokenProxy = new ERC1967Proxy(
-            address(issueTokenImpl),
-            abi.encodeWithSelector(SimpleToken.initialize.selector, "avETH MAX", "avETHx")
+            address(issueTokenImpl), abi.encodeWithSelector(SimpleToken.initialize.selector, "avETH MAX", "avETHx")
         );
         issueToken = SimpleToken(address(issueTokenProxy));
 
@@ -61,13 +60,7 @@ contract RequestsManagerV2Test is Test {
         address[] memory allowedTokens = new address[](1);
         allowedTokens[0] = address(depositToken);
 
-        manager = new RequestsManagerV2(
-            address(issueToken),
-            address(priceStorage),
-            treasury,
-            allowedTokens,
-            BURN_TTL
-        );
+        manager = new RequestsManagerV2(address(issueToken), address(priceStorage), treasury, allowedTokens, BURN_TTL);
 
         manager.grantRole(SERVICE_ROLE, service);
         manager.grantRole(PAUSER_ROLE, admin);
@@ -388,11 +381,13 @@ contract RequestsManagerV2Test is Test {
         manager.completeMint(id);
 
         vm.prank(admin);
-        vm.expectRevert(abi.encodeWithSelector(
-            IRequestsManagerV2.IllegalState.selector,
-            IRequestsManagerV2.State.CREATED,
-            IRequestsManagerV2.State.COMPLETED
-        ));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IRequestsManagerV2.IllegalState.selector,
+                IRequestsManagerV2.State.CREATED,
+                IRequestsManagerV2.State.COMPLETED
+            )
+        );
         manager.adminCancelMint(id);
     }
 
@@ -792,11 +787,13 @@ contract RequestsManagerV2Test is Test {
         manager.cancelMint(id);
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(
-            IRequestsManagerV2.IllegalState.selector,
-            IRequestsManagerV2.State.CREATED,
-            IRequestsManagerV2.State.CANCELLED
-        ));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IRequestsManagerV2.IllegalState.selector,
+                IRequestsManagerV2.State.CREATED,
+                IRequestsManagerV2.State.CANCELLED
+            )
+        );
         manager.cancelMint(id);
     }
 
@@ -809,11 +806,13 @@ contract RequestsManagerV2Test is Test {
         manager.cancelBurn(id);
 
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(
-            IRequestsManagerV2.IllegalState.selector,
-            IRequestsManagerV2.State.CREATED,
-            IRequestsManagerV2.State.CANCELLED
-        ));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IRequestsManagerV2.IllegalState.selector,
+                IRequestsManagerV2.State.CREATED,
+                IRequestsManagerV2.State.CANCELLED
+            )
+        );
         manager.cancelBurn(id);
     }
 
@@ -849,11 +848,13 @@ contract RequestsManagerV2Test is Test {
         manager.completeMint(id);
 
         vm.prank(service);
-        vm.expectRevert(abi.encodeWithSelector(
-            IRequestsManagerV2.IllegalState.selector,
-            IRequestsManagerV2.State.CREATED,
-            IRequestsManagerV2.State.COMPLETED
-        ));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IRequestsManagerV2.IllegalState.selector,
+                IRequestsManagerV2.State.CREATED,
+                IRequestsManagerV2.State.COMPLETED
+            )
+        );
         manager.completeMint(id);
     }
 
@@ -867,11 +868,13 @@ contract RequestsManagerV2Test is Test {
         manager.completeBurn(id);
 
         vm.prank(service);
-        vm.expectRevert(abi.encodeWithSelector(
-            IRequestsManagerV2.IllegalState.selector,
-            IRequestsManagerV2.State.CREATED,
-            IRequestsManagerV2.State.COMPLETED
-        ));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IRequestsManagerV2.IllegalState.selector,
+                IRequestsManagerV2.State.CREATED,
+                IRequestsManagerV2.State.COMPLETED
+            )
+        );
         manager.completeBurn(id);
     }
 }
