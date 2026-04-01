@@ -15,7 +15,6 @@ docs/
 
 # Dependencies
 node_modules/
-package-lock.json
 
 # Foundry
 cache/
