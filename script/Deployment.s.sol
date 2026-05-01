@@ -14,16 +14,21 @@ contract DeploymentScript is Script {
     // | Config                                                      |
     // └─────────────────────────────────────────────────────────────┘
 
-    string TOKEN_NAME = "avETH MAX";
-    string TOKEN_SYMBOL = "avETHx";
+    string TOKEN_NAME = "avETH PLUS";
+    string TOKEN_SYMBOL = "avETH+";
 
     uint128 PRICE_UPDATE_UPPER_BOUND_PERCENTAGE = 0.05 ether; // 5%
     uint128 PRICE_UPDATE_LOWER_BOUND_PERCENTAGE = 0.33 ether; // 33%
 
     address INPUT_TOKEN = 0x9469470C9878bf3d6d0604831d9A3A366156f7EE; // avETH on Ethereum
-    address MINT_DEPOSIT_VAULT = 0xdD71CDd615f677E98C604bFF5679294cC7a6089b; // MAX avETH - Mint Deposit Vault (avETH Workspace)
+    address MINT_DEPOSIT_VAULT = 0xE6d92b7505C80a2563DD7C9406D56EfcA1710462; // PLUS avETH - Mint Deposit Vault (avETH Workspace)
     address MINT_REDEEM_SERVICE_WALLET = 0xAF6fd55A83B0F85b4f330E2B25512C2b669786D2; // Avant Bot (avETH Workspace)
     address PRICE_UPDATE_SERVICE_WALLET = 0xAF6fd55A83B0F85b4f330E2B25512C2b669786D2; // Avant Bot (avETH Workspace)
+
+    // address INPUT_TOKEN = 0x9469470C9878bf3d6d0604831d9A3A366156f7EE; // avETH on Ethereum
+    // address MINT_DEPOSIT_VAULT = 0xdD71CDd615f677E98C604bFF5679294cC7a6089b; // MAX avETH - Mint Deposit Vault (avETH Workspace)
+    // address MINT_REDEEM_SERVICE_WALLET = 0xAF6fd55A83B0F85b4f330E2B25512C2b669786D2; // Avant Bot (avETH Workspace)
+    // address PRICE_UPDATE_SERVICE_WALLET = 0xAF6fd55A83B0F85b4f330E2B25512C2b669786D2; // Avant Bot (avETH Workspace)
 
     // address INPUT_TOKEN = 0xfd2c2A98009d0cBed715882036e43d26C4289053; // avBTC on Avalanche
     // address MINT_DEPOSIT_VAULT = 0xC8fc3Ff83479b78E21a989807FB10D0E3D840ddf; // MAX avBTC - Mint Deposit Vault
