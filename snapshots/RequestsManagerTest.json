@@ -4,7 +4,7 @@
   "RequestsManager_cancelMint": "6259",
   "RequestsManager_completeBurn": "46306",
   "RequestsManager_completeMint": "82864",
-  "RequestsManager_constructor": "7232027",
+  "RequestsManager_constructor": "7252095",
   "RequestsManager_emergencyWithdraw": "28717",
   "RequestsManager_pause": "8863",
   "RequestsManager_removeAllowedToken": "8981",

@@ -12,12 +12,12 @@ contract DeploymentTest is Test {
     DeploymentScript public deploymentScript;
 
     // Expected configuration values from the script
-    string constant TOKEN_NAME = "avETH MAX";
-    string constant TOKEN_SYMBOL = "avETHx";
+    string constant TOKEN_NAME = "avETH PLUS";
+    string constant TOKEN_SYMBOL = "avETH+";
     uint256 constant PRICE_UPDATE_UPPER_BOUND_PERCENTAGE = 0.05 ether;
     uint256 constant PRICE_UPDATE_LOWER_BOUND_PERCENTAGE = 0.33 ether;
     address constant INPUT_TOKEN = 0x9469470C9878bf3d6d0604831d9A3A366156f7EE;
-    address constant MINT_DEPOSIT_VAULT = 0xdD71CDd615f677E98C604bFF5679294cC7a6089b;
+    address constant MINT_DEPOSIT_VAULT = 0xE6d92b7505C80a2563DD7C9406D56EfcA1710462;
     address constant MINT_REDEEM_SERVICE_WALLET = 0xAF6fd55A83B0F85b4f330E2B25512C2b669786D2;
     address constant PRICE_UPDATE_SERVICE_WALLET = 0xAF6fd55A83B0F85b4f330E2B25512C2b669786D2;
 
@@ -26,12 +26,13 @@ contract DeploymentTest is Test {
     address deployer;
 
     function setUp() public {
-        // Fork mainnet - use try/catch for RPC URL
+        // Fork mainnet. Requires ETH_RPC_URL (e.g. an Alchemy endpoint; see .env) — fails
+        // loudly if unset rather than silently falling back to a flaky public node.
         string memory rpcUrl;
         try vm.envString("ETH_RPC_URL") returns (string memory url) {
             rpcUrl = url;
         } catch {
-            rpcUrl = "https://eth.llamarpc.com";
+            revert("ETH_RPC_URL is not set - add it to .env or export it (e.g. an Alchemy mainnet RPC URL)");
         }
         vm.createSelectFork(rpcUrl);
 

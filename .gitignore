@@ -26,3 +26,4 @@ foundry.lock
 coverage/
 lcov.info
 .gas-snapshot
+AUDIT_NOTES.md

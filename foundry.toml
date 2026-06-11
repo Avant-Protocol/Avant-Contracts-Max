@@ -5,6 +5,14 @@ libs = ["lib"]
 optimizer = true
 optimizer_runs = 1_000
 
+# Pinned for deterministic, cross-chain-safe deployment of the non-upgradeable
+# RequestsManagerV2. evm_version is held at "shanghai" (PUSH0, no MCOPY/transient
+# opcodes) so the same bytecode is valid on every target chain in DeployV2.s.sol;
+# bump to "cancun" only after confirming support on all of them. solc is pinned
+# so an immutably-deployed contract is reproducible.
+solc = "0.8.28"
+evm_version = "shanghai"
+
 # https://docs.openzeppelin.com/upgrades-plugins/foundry-upgrades
 ffi = true
 ast = true

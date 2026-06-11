@@ -6,11 +6,10 @@ import {Script, console} from "forge-std/Script.sol";
 import {RequestsManagerV2} from "../src/RequestsManagerV2.sol";
 
 /// @title DeployV2
-/// @notice Deploys RequestsManagerV2 for a single product. Reuses the existing PriceStorage
-///         and SimpleToken contracts. After deployment:
-///         1. Grant SERVICE_ROLE on the existing SimpleToken to the new RequestsManagerV2
-///         2. Pause the old RequestsManager (blocks new requests, existing burns can still complete)
-///         3. Once all V1 burn requests are settled, revoke SERVICE_ROLE from old RequestsManager on SimpleToken
+/// @notice Deploys RequestsManagerV2 for a single product, reusing the existing PriceStorage
+///         and SimpleToken contracts. The manager deploys paused; the script prints the full
+///         post-deployment checklist (role grants, treasury approval, unpause, migration,
+///         admin handoff) — that printed checklist is the single source of truth.
 ///
 /// Usage:
 ///   PRODUCT=avUSD NETWORK=fuji     forge script DeployV2 --broadcast --rpc-url $RPC_URL
@@ -21,6 +20,8 @@ import {RequestsManagerV2} from "../src/RequestsManagerV2.sol";
 ///   PRODUCT=avETH NETWORK=ethereum  forge script DeployV2 --broadcast --rpc-url $RPC_URL
 contract DeployV2 is Script {
     uint64 constant BURN_TTL = 30 days;
+    uint64 constant BURN_CANCEL_WINDOW = 2 days;
+    uint64 constant MINT_TTL = 1 days; // mints are expected within minutes; this is generous headroom
 
     function run() public {
         string memory product = vm.envString("PRODUCT");
@@ -41,7 +42,9 @@ contract DeployV2 is Script {
         address[] memory allowedTokens = new address[](1);
         allowedTokens[0] = depositToken;
 
-        RequestsManagerV2 manager = new RequestsManagerV2(issueToken, priceStorage, treasury, allowedTokens, BURN_TTL);
+        RequestsManagerV2 manager = new RequestsManagerV2(
+            issueToken, priceStorage, treasury, allowedTokens, BURN_TTL, BURN_CANCEL_WINDOW, MINT_TTL
+        );
         console.log("RequestsManagerV2 deployed: %s", address(manager));
 
         // Grant roles
@@ -54,25 +57,36 @@ contract DeployV2 is Script {
         vm.stopBroadcast();
 
         console.log("");
-        console.log("=== POST-DEPLOYMENT STEPS (multisig required for 1 and 5) ===");
+        console.log("=== POST-DEPLOYMENT STEPS (multisig required for 1 and 7) ===");
+        console.log("");
+        console.log("NOTE: RequestsManagerV2 deploys PAUSED. Unpause (step 3) ONLY after steps 1-2,");
+        console.log("      so no request is escrowed before it can be completed.");
         console.log("");
         console.log("1. [MULTISIG] Grant SERVICE_ROLE on SimpleToken to RequestsManagerV2:");
         console.log("   Target:   %s", issueToken);
         console.log("   Function: grantRole(bytes32,address)");
-        console.log("   Args:     role=0x%s  account=%s", vm.toString(manager.SERVICE_ROLE()), address(manager));
+        console.log("   Args:     role=%s  account=%s", vm.toString(manager.SERVICE_ROLE()), address(manager));
         console.log("");
-        console.log("2. Switch frontend to use RequestsManagerV2 at %s", address(manager));
-        console.log("3. Stop backend from completing new V1 requests");
-        console.log("4. Wait for all pending V1 burn requests to settle");
+        console.log("2. [TREASURY] Approve RequestsManagerV2 to spend the withdrawal token");
+        console.log("   (completeBurn pulls from the treasury via this standing allowance):");
+        console.log("   Target:   %s", depositToken);
+        console.log("   Function: approve(address,uint256)");
+        console.log("   Args:     spender=%s  amount=<standing allowance>", address(manager));
         console.log("");
-        console.log("5. [MULTISIG] Revoke SERVICE_ROLE from old V1 RequestsManager on SimpleToken:");
+        console.log("3. [ADMIN] Unpause RequestsManagerV2: manager.unpause()");
+        console.log("4. Switch frontend to use RequestsManagerV2 at %s", address(manager));
+        console.log("5. Stop backend from completing new V1 requests");
+        console.log("6. Wait for all pending V1 burn requests to settle");
+        console.log("");
+        console.log("7. [MULTISIG] Revoke SERVICE_ROLE from old V1 RequestsManager on SimpleToken:");
         console.log("   Target:   %s", issueToken);
         console.log("   Function: revokeRole(bytes32,address)");
-        console.log(
-            "   Args:     role=0x%s  account=<V1_REQUESTS_MANAGER_ADDRESS>", vm.toString(manager.SERVICE_ROLE())
-        );
+        console.log("   Args:     role=%s  account=<V1_REQUESTS_MANAGER_ADDRESS>", vm.toString(manager.SERVICE_ROLE()));
         console.log("");
-        console.log("6. (Optional) Grant PAUSER_ROLE to security monitoring addresses");
+        console.log("8. [ADMIN -> MULTISIG] Hand off DEFAULT_ADMIN_ROLE from the deployer EOA to the");
+        console.log("   Fordefi admin: beginDefaultAdminTransfer(fordefiAdmin), then after the 1-day");
+        console.log("   delay acceptDefaultAdminTransfer() from the Fordefi admin.");
+        console.log("9. (Optional) Grant PAUSER_ROLE to a dedicated security-monitoring address");
     }
 
     function _getConfig(string memory product, string memory network)
