@@ -152,8 +152,10 @@ contract RequestsManagerV2 is IRequestsManagerV2, AccessControlDefaultAdminRules
         emit AllowedTokenRemoved(_allowedTokenAddress);
     }
 
-    /// @notice Pauses request and completion. Cancellation paths stay enabled so pending
-    ///         requests can always be unwound while paused.
+    /// @notice Pauses request and completion. Cancellation entry points are not paused, but
+    ///         cancelBurn stays window-bounded — burnCancelWindow keeps elapsing during a
+    ///         pause, so a burn past its window can be unwound only via adminCancelBurn.
+    ///         cancelMint has no window/TTL gate and stays available while CREATED.
     function pause() external onlyRole(PAUSER_ROLE) {
         Pausable._pause();
     }
