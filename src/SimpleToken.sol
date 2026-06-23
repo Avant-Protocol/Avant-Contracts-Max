@@ -21,16 +21,18 @@ contract SimpleToken is ISimpleToken, Initializable, ERC20PermitUpgradeable, Acc
         if (mintIds[_idempotencyKey]) {
             revert IdempotencyKeyAlreadyExist(_idempotencyKey);
         }
-        _;
+        // CEI: record the key as consumed before running the body, so a re-entrant call
+        // (e.g. if a future _update override adds a hook) observes it as used and reverts.
         mintIds[_idempotencyKey] = true;
+        _;
     }
 
     modifier idempotentBurn(bytes32 _idempotencyKey) {
         if (burnIds[_idempotencyKey]) {
             revert IdempotencyKeyAlreadyExist(_idempotencyKey);
         }
-        _;
         burnIds[_idempotencyKey] = true;
+        _;
     }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
