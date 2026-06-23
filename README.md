@@ -79,13 +79,13 @@ The protocol's asynchronous lifecycle creates different timing requirements for 
 
 **Mints** are completed within minutes of the request. The contract uses the latest price from `PriceStorage.lastPrice()` at completion time. Since prices update weekly, the "latest price" is simply the current protocol price. There is no time-lag arbitrage risk because the user does not control when `completeMint` is called.
 
-**Burns** have a 7-day settlement delay (enforced off-chain by the backend). If the contract used the price at completion time, users could exploit price movements during the delay — requesting a burn before a price increase, then receiving more base tokens than they should. V2 prevents this by capturing the price value directly in the `BurnRequest` struct at the moment `requestBurn` is called. The `completeBurn` function uses this stored price, making the withdrawal amount immune to post-request price changes.
+**Burns** have a 7-day settlement delay (enforced off-chain by the backend). If the contract simply used the price at completion time, users could exploit price movements during the delay — requesting a burn before a price increase, then receiving more base tokens than they should. V2 prevents this by capturing the price in the `BurnRequest` struct at the moment `requestBurn` is called and treating it as a **ceiling**: `completeBurn` settles at `min(lockedPrice, currentPrice)`. A price rise after the request does not increase the payout (the locked price caps it); a price fall lowers it — the redeemer bears a NAV decline during the delay.
 
 ### Removed features
 
 **Idempotency key parameter.** V1 required the caller to provide a `bytes32` idempotency key for each completion. V2 derives it internally from the request ID (`keccak256(abi.encodePacked("mint", _id))`), eliminating a parameter the backend had to generate and track. The state machine (`CREATED → COMPLETED`) already prevents double-completion; the derived key is a redundant safety net at the SimpleToken level.
 
-**Minimum expected amount (slippage protection).** V1 let users specify a `minExpectedAmount` floor. V2 removes this because mints complete within minutes using the current price, and burn prices are locked at request time and cannot change. With deterministic pricing, slippage protection adds no value — and a failed request would force the user to cancel, re-request, and wait through the cooldown again.
+**Minimum expected amount (slippage protection).** V1 let users specify a `minExpectedAmount` floor. V2 removes this because mints complete within minutes at the current price, and burns settle at `min(lockedPrice, currentPrice)` — the request-time price caps the payout and a price fall during the delay is borne by the redeemer, who can still exit via `cancelBurn` within the cancel window. A failed request would otherwise force the user to cancel, re-request, and wait through the cooldown again.
 
 **Whitelist.** V1 optionally restricted which addresses could create requests via an `AddressesWhitelist` contract. V2 removes it — the backend already gatekeeps by choosing whether to complete requests, and `adminCancelMint`/`adminCancelBurn` can return funds from unwanted requests.
 
@@ -98,6 +98,10 @@ The protocol's asynchronous lifecycle creates different timing requirements for 
 **Configurable fees.** `setMintFee` and `setBurnFee` allow the admin to set fees up to 5% (`MAX_FEE`). Fees are applied as a discount on the output amount — they reduce what the user receives, and the difference stays in the system as over-collateralization (mints) or retained treasury balance (burns). Fees start at 0.
 
 **Burn TTL.** `burnRequestTTL` sets a maximum age for burn requests (default 30 days). Expired requests cannot be completed by the service, but can still be cancelled by the user or admin.
+
+**Mint TTL.** `mintRequestTTL` sets a maximum age for mint requests (default 1 day). Past the TTL, `completeMint` reverts; the request stays cancellable by the user (`cancelMint`) or admin.
+
+**Burn cancel window.** `burnCancelWindow` (default 2 days) bounds how long the provider may `cancelBurn` after requesting; once it closes, only `adminCancelBurn` can unwind a pending burn. It stops a redeemer from waiting out an oracle update and re-requesting to re-roll the price ceiling.
 
 **18-decimal enforcement.** `addAllowedToken` verifies the token has 18 decimals, preventing cross-decimal arithmetic errors.
 
@@ -115,14 +119,14 @@ V1 and V2 RequestsManagers co-exist during migration:
 
 V1 is not paused during migration — it remains accessible for direct contract interactions, but the backend will not complete new V1 requests. Users who interact with V1 directly can cancel their requests to recover their funds.
 
-V2 request counters start at 10,000 to avoid ID collisions with V1 (which has fewer than 10,000 existing orders).
+V2 request counters start at 100,000 to avoid ID collisions with V1 (which has fewer than 100,000 existing orders).
 
 ### Trust model
 
 The protocol is a managed system, not a trustless DEX. Users trust the admin multisig (`DEFAULT_ADMIN_ROLE` with 1-day transfer delay via `AccessControlDefaultAdminRules`). The admin can:
 
 - Change the treasury address (`setTreasury`)
-- Change fees retroactively on pending burns (`setBurnFee`)
+- Change fees (`setMintFee`, `setBurnFee`) — the mint fee applies at completion (affecting pending mints), while the burn fee is locked per request and applies only to new burns
 - Cancel any request (`adminCancelMint`, `adminCancelBurn`)
 - Withdraw all contract-held tokens (`emergencyWithdraw`)
 - Set prices within bounds via the service wallet
@@ -130,7 +134,7 @@ The protocol is a managed system, not a trustless DEX. Users trust the admin mul
 What the admin **cannot** do (and what V2 specifically prevents):
 
 - Mint arbitrary amounts of tokens — amounts are computed from bounded on-chain prices
-- Bypass the price bounds in PriceStorage — each update is constrained to ±5%/±33% of the previous price
+- Bypass the price bounds in PriceStorage — each update is constrained to the configured upper/lower bound percentages of the previous price (test config: +5% / -33%; production values set at deployment)
 - Steal user funds via `completeMint`/`completeBurn` — output amounts are deterministic
 
 ## Auditor Reference
@@ -142,9 +146,11 @@ What the admin **cannot** do (and what V2 specifically prevents):
 | Operation | Formula | Rounding |
 |-----------|---------|----------|
 | Mint | `mintAmount = (depositAmount * PRECISION / price) * (PRECISION - mintFee) / PRECISION` | Truncates — user receives less (favors protocol) |
-| Burn | `withdrawalAmount = (burnAmount * price / PRECISION) * (PRECISION - burnFee) / PRECISION` | Truncates — user receives less (favors protocol) |
+| Burn | `withdrawalAmount = (burnAmount * min(lockedPrice, currentPrice) / PRECISION) * (PRECISION - lockedFee) / PRECISION` | Truncates — user receives less (favors protocol) |
 
 Two sequential divisions means two truncation steps. Maximum error is < 2 wei at 18-decimal precision.
+
+For burns, `lockedPrice` and `lockedFee` are the price ceiling and fee captured at `requestBurn`, and `completeBurn` settles at the lower of `lockedPrice` and the completion-time `currentPrice`. Mints use the completion-time price and the live `mintFee`.
 
 ### State machine
 
@@ -167,7 +173,7 @@ All transitions are one-way. No path from COMPLETED or CANCELLED back to CREATED
 | completeMint, completeBurn | | X | | |
 | pause | | | X | |
 | unpause | X | | | |
-| setTreasury, setMintFee, setBurnFee, setBurnRequestTTL, addAllowedToken, removeAllowedToken | X | | | |
+| setTreasury, setMintFee, setBurnFee, setBurnRequestTTL, setMintRequestTTL, setBurnCancelWindow, addAllowedToken, removeAllowedToken | X | | | |
 | adminCancelMint, adminCancelBurn, emergencyWithdraw | X | | | |
 | requestMint, requestBurn, cancelMint, cancelBurn | | | | X |
 
@@ -177,7 +183,7 @@ All transitions are one-way. No path from COMPLETED or CANCELLED back to CREATED
 
 | Contract | Trust assumption |
 |----------|-----------------|
-| **PriceStorage** | Returns honest prices. Bounds (±5%/±33%) limit per-update manipulation. Write-once semantics prevent retroactive changes. |
+| **PriceStorage** | Returns honest prices. Configurable per-update bounds (test config: +5% / -33%) limit manipulation. Write-once semantics prevent retroactive changes. |
 | **SimpleToken** | Mints/burns only when called by SERVICE_ROLE holders. RequestsManagerV2 is granted this role. |
 | **Deposit tokens** | Standard ERC-20 with 18 decimals. Non-rebasing, non-fee-on-transfer. |
 
