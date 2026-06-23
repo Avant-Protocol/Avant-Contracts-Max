@@ -225,7 +225,7 @@ contract RequestsManagerV2 is IRequestsManagerV2, AccessControlDefaultAdminRules
         });
 
         unchecked {
-            mintRequestsCounter++;
+            mintRequestsCounter = id + 1;
         }
 
         IERC20(_depositTokenAddress).safeTransferFrom(msg.sender, address(this), _amount);
@@ -264,11 +264,12 @@ contract RequestsManagerV2 is IRequestsManagerV2, AccessControlDefaultAdminRules
         MintRequest storage request = mintRequests[_id];
         _assertState(State.CREATED, request.state);
 
+        address provider = request.provider;
         request.state = State.CANCELLED;
 
-        IERC20(request.token).safeTransfer(request.provider, request.amount);
+        IERC20(request.token).safeTransfer(provider, request.amount);
 
-        emit MintRequestAdminCancelled(_id, request.provider, msg.sender);
+        emit MintRequestAdminCancelled(_id, provider, msg.sender);
     }
 
     /// @notice Settles a mint at the latest price: mintAmount = depositAmount * PRECISION / price,
@@ -287,10 +288,11 @@ contract RequestsManagerV2 is IRequestsManagerV2, AccessControlDefaultAdminRules
         address provider = request.provider;
         address token = request.token;
         uint256 depositAmount = request.amount;
+        uint64 fee = mintFee;
 
         // price = deposit-token value of 1 issue token; truncation favors the protocol.
         uint256 mintAmount = (depositAmount * PRECISION) / price;
-        mintAmount = (mintAmount * (PRECISION - mintFee)) / PRECISION;
+        mintAmount = (mintAmount * (PRECISION - fee)) / PRECISION;
 
         // Dust that rounds to 0 would consume the deposit for nothing; revert (still refundable).
         if (mintAmount == 0) revert ZeroAmountOut(_id);
@@ -303,7 +305,7 @@ contract RequestsManagerV2 is IRequestsManagerV2, AccessControlDefaultAdminRules
         bytes32 idempotencyKey = keccak256(abi.encodePacked("mint", _id));
         ISimpleToken(ISSUE_TOKEN_ADDRESS).mint(idempotencyKey, provider, mintAmount);
 
-        emit MintRequestCompleted(_id, provider, depositAmount, mintAmount, price, mintFee);
+        emit MintRequestCompleted(_id, provider, depositAmount, mintAmount, price, fee);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -336,7 +338,7 @@ contract RequestsManagerV2 is IRequestsManagerV2, AccessControlDefaultAdminRules
         });
 
         unchecked {
-            burnRequestsCounter++;
+            burnRequestsCounter = id + 1;
         }
 
         IERC20(ISSUE_TOKEN_ADDRESS).safeTransferFrom(msg.sender, address(this), _issueTokenAmount);
@@ -381,11 +383,12 @@ contract RequestsManagerV2 is IRequestsManagerV2, AccessControlDefaultAdminRules
         BurnRequest storage request = burnRequests[_id];
         _assertState(State.CREATED, request.state);
 
+        address provider = request.provider;
         request.state = State.CANCELLED;
 
-        IERC20(ISSUE_TOKEN_ADDRESS).safeTransfer(request.provider, request.amount);
+        IERC20(ISSUE_TOKEN_ADDRESS).safeTransfer(provider, request.amount);
 
-        emit BurnRequestAdminCancelled(_id, request.provider, msg.sender);
+        emit BurnRequestAdminCancelled(_id, provider, msg.sender);
     }
 
     /// @notice Settles a burn at min(lockedPrice, currentPrice): withdrawalAmount =
