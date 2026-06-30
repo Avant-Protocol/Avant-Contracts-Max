@@ -1,0 +1,291 @@
+% =====================================================================
+% Clean Pandoc XeLaTeX Template for Formal Verification Reports
+% Fully compatible with Manjaro (Arch) and uses safe system fonts.
+% =====================================================================
+
+\documentclass[10pt]{article}
+
+% ---------- Page Layout ----------
+\usepackage[a4paper,margin=1.5cm]{geometry}
+
+% ---------- Fonts (Safe for Arch/Manjaro) ----------
+\usepackage{fontspec}
+\setmainfont{DejaVu Serif}
+\setsansfont{DejaVu Sans}
+\setmonofont{DejaVu Sans Mono}
+
+% ---------- Line Spacing ----------
+\usepackage{setspace}
+\onehalfspacing
+
+% ---------- Section Numbering ----------
+\setcounter{secnumdepth}{0}
+\setcounter{tocdepth}{3}
+
+% ---------- Titles ----------
+\usepackage{titlesec}
+
+\titleformat{\section}
+  {\Large\bfseries}
+  {\thesection}{1em}{\raggedright}
+
+\titleformat{\subsection}
+  {\large\bfseries}
+  {\thesubsection}{1em}{\raggedright}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries}
+  {\thesubsubsection}{1em}{\raggedright}
+
+\titleformat{\paragraph}[block]
+  {\small\bfseries}
+  {\theparagraph}{1em}{\raggedright}
+\titlespacing*{\paragraph}{0pt}{1.5ex plus 0.5ex minus 0.2ex}{0.5ex plus 0.2ex}
+
+% ---------- Better Tables ----------
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+\usepackage[table]{xcolor}
+\usepackage{changepage}
+
+\usepackage{tabularx}
+\newcolumntype{Z}{>{\raggedright\arraybackslash}p{2cm}}
+\newenvironment{smalltable}{\small}{}
+
+\usepackage{ltablex}
+\keepXColumns
+\newcommand{\zwsp}{\hspace{0pt}}
+
+% ---------- Code/Inline helpers ----------
+% Use fvextra + tcolorbox to get wrapping inline and code block styling
+
+\usepackage{fvextra}      % provides \Verb with breaklines
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{listings}     % keep for compatibility with lstinline usage fallback
+\lstset{
+  basicstyle=\ttfamily,
+  breaklines=true,
+  breakatwhitespace=true,
+}
+
+% ---------- Shaded Code Blocks ----------
+% Define Shaded so Pandoc code blocks work
+\newenvironment{Shaded}{}{}
+
+% redefine Shaded to a tcolorbox that is breakable and padded
+\renewenvironment{Shaded}{
+  \begin{tcolorbox}[
+    breakable,
+    enhanced,
+    colback=gray!15,
+    colframe=gray!15,
+    boxrule=0pt,
+    arc=2pt,
+    left=6pt,
+    right=6pt,
+    top=6pt,
+    bottom=6pt,
+    fontupper=\tiny
+  ]
+}{
+  \end{tcolorbox}
+}
+
+% ---------- Verbatim Highlighting ----------
+% This controls Pandoc's Highlighting (code blocks)
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{
+  breaklines=true,
+  breakanywhere=true,
+  commandchars=\\\{\},
+  fontsize=\scriptsize
+}
+
+% ---------- Inline code box (wrap-safe) ----------
+% create an inline tcolorbox that wraps (uses \Verb for correct escaping)
+\newtcbox{\inlinecode}{%
+  enhanced,
+  on line,
+  colback=gray!25,
+  colframe=gray!25,
+  arc=2pt,
+  outer arc=2pt,
+  boxrule=0pt,
+  top=1pt,
+  bottom=1pt,
+  left=3pt,
+  right=3pt,
+  boxsep=0pt,
+  valign=center,
+  sharp corners,
+  breakable,
+  fontupper=\scriptsize
+}
+
+% Replace Pandoc's \texttt with a wrap-capable inline box
+% Use \Verb from fvextra (breaklines, breakanywhere) so content wraps and escapes are preserved
+\renewcommand{\texttt}[1]{%
+  \inlinecode{\ttfamily\strut\Verb[breaklines,breakanywhere,commandchars=\\\{\}]!#1!}%
+}
+
+% Provide a safe discretionary break for double-colon sequences without changing catcodes
+\begingroup\lccode`~=`:\lowercase{\endgroup
+  \def~{\discretionary{::}{::}{::}}}
+% note: this defines a "virtual break" that won't change catcodes
+
+% ---------- Math / Symbols ----------
+\usepackage{amssymb}
+
+% ---------- Pandoc syntax highlighting macros ----------
+\usepackage{color}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.26,0.59,0.98}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.38,0.38}{\textit{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\VariableTok}[1]{#1}
+\newcommand{\ControlFlowTok}[1]{\textbf{#1}}
+\newcommand{\OperatorTok}[1]{#1}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.38,0.38,0.38}{#1}}
+\newcommand{\AttributeTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.38,0.38}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\NormalTok}[1]{#1}
+
+% ---------- Hyperlinks ----------
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+
+% ---------- Remove Pandoc Blank Page ----------
+\let\cleardoublepage\clearpage
+
+% ---------- List Tightening ----------
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\makeatletter
+
+% Page number width
+\renewcommand{\@pnumwidth}{2.5em}
+
+% Right margin spacing
+\renewcommand{\@tocrmarg}{3.5em}
+
+% Dot spacing between title and page number
+\renewcommand{\@dotsep}{1.5}
+
+% Multiline section entries in TOC
+\renewcommand{\l@section}[2]{%
+  \@dottedtocline{1}{0em}{1.8em}{\raggedright #1}{#2}%
+}
+
+\renewcommand{\l@subsection}[2]{%
+  \@dottedtocline{2}{1.5em}{3.0em}{\raggedright #1}{#2}%
+}
+
+\renewcommand{\l@subsubsection}[2]{%
+  \@dottedtocline{3}{3.0em}{4.0em}{\raggedright #1}{#2}%
+}
+
+\newcommand{\speciallabel}[2]{% \speciallabel{<stuff>}{<label>}
+  \edef\@currentlabel{#1}\label{#2}%
+}
+\makeatother
+
+
+\newcommand\possiblebreak{\ifhmode\unskip\space\hfil\penalty0\hfilneg\fi}
+
+% =====================================================================
+% CERTORA RUN LINK (user macros)
+% =====================================================================
+
+% RMV2_AccessControl.spec
+\newcommand{\ACLinkVerified}{https://prover.certora.com/output/75513/b2b0d3cdbdc241f7b06bf921bb76d522?anonymousKey=cf22b5602a49835aca41684fd12186fb87fd8085}
+\newcommand{\ACLinkMitig}{https://prover.certora.com/output/75513/0f17bbd6a2af4053adb0ddc8af3f44aa/?anonymousKey=cd025cacff18897f06e77c6287a188101e5e6627}
+
+% RMV2_Idempotency.spec
+\newcommand{\IDPLinkVerified}{https://prover.certora.com/output/75513/78a7dab2ccc34400a4b61b40b6dcb27b?anonymousKey=370d19edc8b2b316d43245f6e26ef47c311b3075}
+\newcommand{\IDPLinkMitig}{https://prover.certora.com/output/75513/8855a213b18a4877b866951301b7da2f/?anonymousKey=8429615decfd6a56c5aff9c4f3ad7a12234751f7}
+
+% RMV2_Escrow.spec
+\newcommand{\ELinkVerified}{https://prover.certora.com/output/75513/808d40f64f994554ac95a8143a8f59ee?anonymousKey=5f6176086fe1c2fc2472ef3b1ba54de004b53e91}
+\newcommand{\ELinkViolated}{https://prover.certora.com/output/75513/df72fecf53f54d5f84e47955de05472a/?anonymousKey=c486fc00f4ac825ad13e17d429f54c5215827607}
+\newcommand{\ELinkMitig}{https://prover.certora.com/output/75513/708bcf5612c34c389b8591df77de5cdf?anonymousKey=07395f54b3ee65fb2aacc47a0a28d478527e45ed}
+
+% RMV2_StateMachine.spec
+\newcommand{\SMLinkVerified}{https://prover.certora.com/output/75513/9ddb40666f054673b65c4da197b8cd1d?anonymousKey=bcdccdd1dbb69ad0b74bae0680a8c5240934a5ed}
+\newcommand{\SMLinkMitig}{https://prover.certora.com/output/75513/f05f51f97315466cadb88eb43af63d43/?anonymousKey=0f81cf4834a022e20bbd388e03161cd03792c920}
+
+% RMV2_Structural.spec
+\newcommand{\STRUCTLinkVerified}{https://prover.certora.com/output/75513/a6ee8fc9973c4b91a940f7a953f64e56?anonymousKey=349777163c1145060aa4e9e9a43f08ba5a042808}
+\newcommand{\STRUCTLinkMitig}{https://prover.certora.com/output/75513/d796dffdbb7c4fdabeeeef4c5b1910dd/?anonymousKey=c073e73dfce18b8175c8e58877363fd211540e54}
+
+% RMV2_Settlement.spec
+\newcommand{\SLinkVerified}{https://prover.certora.com/output/75513/3a77d0d8443b4c5cad6da274acb5ea0d?anonymousKey=e50c939b03d26b48f8cf5050d88f2bea8baedc8a}
+\newcommand{\SLinkMitig}{https://prover.certora.com/output/75513/2d12a073972948bba651dca67114d942/?anonymousKey=86bca1f978801d592b4c95af30e6a5a84ca14471}
+
+% SimpleToken_Core.spec
+\newcommand{\STCORELinkVerified}{https://prover.certora.com/output/75513/2f101d2b8ed344f6b5e537017323b922?anonymousKey=321e8c26050912cd9c8d2c0a062335499f723660}
+\newcommand{\STCORELinkMitig}{https://prover.certora.com/output/75513/64a8296a21734c7286c29d4633b43da8/?anonymousKey=be1f2c0d15555781c8e1e9edc0b72b446c5f2362}
+
+% SimpleToken_ERC20.spec
+\newcommand{\STELinkVerified}{https://prover.certora.com/output/75513/f4bcd084487e446fa10b633983c904a2?anonymousKey=b88a7145c3f0e3f91edbf8631e5f0a8ed35863a0}
+\newcommand{\STELinkMitig}{https://prover.certora.com/output/75513/14d0ba2519af40388d66c835d0583031/?anonymousKey=8cdb7d922e381f7e84cccb5c89fdac3311106683}
+
+% PriceStorage.spec
+\newcommand{\PLinkVerified}{https://prover.certora.com/output/75513/94d10193156041009d7ad260d01d15f5?anonymousKey=fbe346b8272f93528e1a12357cef7c2cde44a665}
+\newcommand{\PLinkMitig}{https://prover.certora.com/output/75513/6ff7a10b558e487197fc7d70e71cad47/?anonymousKey=f6843cdcda838e2346c58cc5e9b8caee63c8c84d}
+
+
+% =====================================================================
+% TITLE PAGE
+% =====================================================================
+
+\begin{document}
+
+% ---- Header (replaces title page) ----
+\begin{flushleft}
+{\large\bfseries $title$: $project$ \par}
+\end{flushleft}
+\vspace{0.3cm}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.1cm}
+
+{\small
+\begin{itemize}
+  \setlength{\itemsep}{2pt}
+  \item \textbf{Date:} $date$
+  \item \textbf{Audit Repo:} \href{$auditrepo$}{$auditrepo$}
+  \item \textbf{Client Repo:} \href{$clientrepo$}{$clientrepo$}
+  \item \textbf{Audit Commit:} $auditcommit$
+  \item \textbf{Mitigation Commit:} $mitigationcommit$
+  \item \textbf{Author:} \href{$twitterhandle$}{$author$} ($subtitle$)
+  \item \textbf{Certora Prover version:} $proverversion$
+\end{itemize}
+}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.4cm}
+
+% ---------- TOC ----------
+{\small
+\tableofcontents
+}
+% ---------- Main Document ----------
+
+\begin{sloppypar}
+$body$
+
+\end{sloppypar}
+
+\end{document}
