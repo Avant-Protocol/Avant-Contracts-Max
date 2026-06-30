@@ -1,0 +1,6 @@
+# Third-party audit deliverables (Cyfrin formal verification).
+# Certora .spec files (CVL) are misdetected by GitHub Linguist as Python/Ruby,
+# which causes CodeQL default setup to scan non-existent source and fail.
+# Mark the whole directory as vendored so it is excluded from language stats
+# and CodeQL language detection.
+certora/** linguist-vendored
