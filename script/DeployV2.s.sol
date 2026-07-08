@@ -20,7 +20,7 @@ import {RequestsManagerV2} from "../src/RequestsManagerV2.sol";
 ///   PRODUCT=avETH NETWORK=ethereum  forge script DeployV2 --broadcast --rpc-url $RPC_URL
 contract DeployV2 is Script {
     uint64 constant BURN_TTL = 30 days;
-    uint64 constant BURN_CANCEL_WINDOW = 2 days;
+    uint64 constant BURN_CANCEL_WINDOW = 30 days;
     uint64 constant MINT_TTL = 1 days; // mints are expected within minutes; this is generous headroom
 
     function run() public {
@@ -144,7 +144,7 @@ contract DeployV2 is Script {
                 0xC02C907B8Dc68f6bCE5C2dE23c49fD8432b201b7, // PriceStorage
                 0x19596e1D6cd97916514B5DBaA4730781eFE49975, // Treasury
                 0xF1c0DB770e77a961efde9DD11216e3833ad5c588, // avUSD deposit token
-                0x19596e1D6cd97916514B5DBaA4730781eFE49975 // Service wallet
+                0xE183B9cB073B83c74DDff041748E162cac1b8e1a // Service wallet
             );
         }
 
