@@ -13,6 +13,9 @@ optimizer_runs = 1_000
 solc = "0.8.28"
 evm_version = "shanghai"
 
+# Vendored audited artifacts used by DeployNewProductV2 (vm.getCode)
+fs_permissions = [{ access = "read", path = "script/artifacts" }]
+
 # https://docs.openzeppelin.com/upgrades-plugins/foundry-upgrades
 ffi = true
 ast = true
@@ -20,5 +23,11 @@ build_info = true
 extra_output = ["storageLayout"]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+# Used only to RUN DeployNewProductV2 (FOUNDRY_PROFILE=ink-deploy): lifts the EVM to
+# cancun so the simulator accepts the cancun-built vendored artifacts. Deployed bytecode
+# is unaffected — that script deploys exclusively from script/artifacts/*.json.
+[profile.ink-deploy]
+evm_version = "cancun"
 
 [profile.ci]
