@@ -13,6 +13,14 @@ optimizer_runs = 1_000
 solc = "0.8.28"
 evm_version = "shanghai"
 
+# Vendored audited artifacts used by DeployNewProductV2 / DeployAvETHPlusV2 (vm.getCode).
+# `out` is required by openzeppelin-foundry-upgrades, which reads build artifacts to run the
+# upgrade-safety validator (Deployment.s.sol / Deployment.t.sol).
+fs_permissions = [
+    { access = "read", path = "script/artifacts" },
+    { access = "read", path = "out" },
+]
+
 # https://docs.openzeppelin.com/upgrades-plugins/foundry-upgrades
 ffi = true
 ast = true
@@ -20,5 +28,13 @@ build_info = true
 extra_output = ["storageLayout"]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+# Used only to RUN the artifact-based deploy scripts (DeployNewProductV2,
+# DeployAvETHPlusV2) and their fork tests: lifts the EVM to cancun so the simulator
+# accepts the cancun-built vendored artifacts. Deployed bytecode is unaffected — those
+# scripts deploy exclusively from script/artifacts/*.json. The target chain must support
+# cancun. Formerly named "ink-deploy", before a second chain needed it.
+[profile.artifact-deploy]
+evm_version = "cancun"
 
 [profile.ci]

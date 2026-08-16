@@ -41,5 +41,5 @@ jobs:
 
       - name: Run Forge tests
         run: |
-          forge test -vvv --no-match-contract DeploymentTest
+          forge test -vvv --no-match-contract 'DeploymentTest|DeployAvETHPlusV2Test'
         id: test
