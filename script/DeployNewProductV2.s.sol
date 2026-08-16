@@ -32,9 +32,9 @@ import {SimpleToken} from "../src/SimpleToken.sol";
 ///         price, unpause, Fordefi admin handoff) is the single source of truth for
 ///         post-deployment steps.
 ///
-/// Usage (ink-deploy profile lifts the EVM to cancun so the simulator accepts the
+/// Usage (the artifact-deploy profile lifts the EVM to cancun so the simulator accepts the
 /// cancun-built legacy artifacts; the target chain must support cancun):
-///   FOUNDRY_PROFILE=ink-deploy PRODUCT=avkBTC NETWORK=ink \
+///   FOUNDRY_PROFILE=artifact-deploy PRODUCT=avkBTC NETWORK=ink \
 ///     forge script DeployNewProductV2 --broadcast --rpc-url $RPC_URL
 contract DeployNewProductV2 is Script {
     uint64 constant BURN_TTL = 30 days;
