@@ -81,9 +81,8 @@ contract DeployNewProductV2 is Script {
         // 1. SimpleToken (pinned HEAD build) behind the audited ERC1967 proxy.
         address tokenImpl = _create(vm.getCode("script/artifacts/SimpleTokenPinned.json"));
         require(tokenImpl.codehash == TOKEN_IMPL_CODEHASH, "SimpleToken impl code mismatch");
-        address tokenProxy = _deployProxy(
-            tokenImpl, abi.encodeCall(SimpleToken.initialize, (cfg.tokenName, cfg.tokenSymbol))
-        );
+        address tokenProxy =
+            _deployProxy(tokenImpl, abi.encodeCall(SimpleToken.initialize, (cfg.tokenName, cfg.tokenSymbol)));
         console.log("%s SimpleToken impl:  %s", cfg.tokenSymbol, tokenImpl);
         console.log("%s SimpleToken proxy: %s", cfg.tokenSymbol, tokenProxy);
 
@@ -109,15 +108,7 @@ contract DeployNewProductV2 is Script {
             _create(
                 abi.encodePacked(
                     vm.getCode("script/artifacts/RequestsManagerV2Pinned.json"),
-                    abi.encode(
-                        tokenProxy,
-                        psProxy,
-                        cfg.treasury,
-                        allowedTokens,
-                        BURN_TTL,
-                        BURN_CANCEL_WINDOW,
-                        MINT_TTL
-                    )
+                    abi.encode(tokenProxy, psProxy, cfg.treasury, allowedTokens, BURN_TTL, BURN_CANCEL_WINDOW, MINT_TTL)
                 )
             )
         );

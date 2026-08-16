@@ -31,6 +31,9 @@ contract DeployAvETHPlusV2Test is Test {
     bytes32 constant SERVICE_ROLE = keccak256("SERVICE_ROLE");
     bytes32 constant DEFAULT_ADMIN_ROLE = 0x00;
 
+    /// @dev One block before the first CREATE of the live deployment.
+    uint256 constant PRE_DEPLOY_BLOCK = 25_741_929;
+
     DeployAvETHPlusV2 script;
     address deployer;
 
@@ -45,7 +48,11 @@ contract DeployAvETHPlusV2Test is Test {
         } catch {
             revert("ETH_RPC_URL is not set - add it to .env or export it (e.g. an Alchemy mainnet RPC URL)");
         }
-        vm.createSelectFork(rpcUrl);
+        // Pinned one block before the real deployment (0x188c46a). These tests assert
+        // pre-cutover preconditions -- V1 still holding SERVICE_ROLE, no mint yet recorded
+        // under idempotency key keccak256("mint", 100000) -- so forking `latest` breaks them
+        // the moment production moves on. The pin also keeps the fork deterministic in CI.
+        vm.createSelectFork(rpcUrl, PRE_DEPLOY_BLOCK);
 
         uint256 pk = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
         deployer = vm.addr(pk);
@@ -127,6 +134,7 @@ contract DeployAvETHPlusV2Test is Test {
     function test_V1IsUndisturbed() public view {
         // V1 keeps its SERVICE_ROLE on the token until the cutover step; the new stack does not
         // touch it, so avETH+ keeps running on V1 while the checklist is worked through.
+        // (Asserted at PRE_DEPLOY_BLOCK; V1 was retired for real after the cutover.)
         assertTrue(SimpleToken(ISSUE_TOKEN).hasRole(SERVICE_ROLE, 0xf66B0d7A0C1c182e530816CdeE6Ea062B63E35e9));
     }
 
