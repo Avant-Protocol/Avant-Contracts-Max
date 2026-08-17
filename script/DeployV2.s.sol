@@ -154,7 +154,7 @@ contract DeployV2 is Script {
                 0xbB518F65b3425d2779477f83BDd502cbc9B7Ce4D, // PriceStorage
                 0x19596e1D6cd97916514B5DBaA4730781eFE49975, // Treasury
                 0xBD9BEBcbAE2851381E1d248b973D8598f0408658, // avBTC deposit token
-                0x19596e1D6cd97916514B5DBaA4730781eFE49975 // Service wallet
+                0xE183B9cB073B83c74DDff041748E162cac1b8e1a // Service wallet
             );
         }
 
@@ -166,7 +166,7 @@ contract DeployV2 is Script {
                 0x5dA81E9a6943f2C14D31CB2355849F0EaB31f0Aa, // PriceStorage
                 0x19596e1D6cd97916514B5DBaA4730781eFE49975, // Treasury
                 0x835229F09c2A9B99D53515ef27b975F61e867353, // avETH deposit token
-                0x19596e1D6cd97916514B5DBaA4730781eFE49975 // Service wallet
+                0xE183B9cB073B83c74DDff041748E162cac1b8e1a // Service wallet
             );
         }
 
